@@ -385,6 +385,32 @@
     });
   };
 
+  const MONTHS = {
+    en: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    km: ["មករា", "កុម្ភៈ", "មីនា", "មេសា", "ឧសភា", "មិថុនា", "កក្កដា", "សីហា", "កញ្ញា", "តុលា", "វិច្ឆិកា", "ធ្នូ"],
+  };
+  const day = (iso) => { const [y, m, d] = iso.split("-"); return `${d} ${MONTHS[km ? "km" : "en"][m - 1]} ${y}`; };
+  const logItem = (date, title, text, now) => {
+    const li = document.createElement("li");
+    if (now) li.className = "now";
+    [["time", "", day(date)], ["h3", "t-h3", title], ["p", "t-small", text]].forEach(([tag, cls, txt]) => {
+      const n = document.createElement(tag);
+      if (cls) n.className = cls;
+      n.textContent = txt;
+      li.append(n);
+    });
+    return li;
+  };
+  // The lab log comes with the live status; the running job is its first entry.
+  const drawLog = (s, state, say) => {
+    const ol = document.querySelector(".log");
+    if (!ol || !s.log || !s.log.length) return;
+    const today = new Date(s.updated_at).toLocaleDateString("en-CA", { timeZone: TZ });
+    const items = s.log.map((e) => { const p = km ? e.km || e.en : e.en; return logItem(e.date, p.title, p.text); });
+    if (say) items.unshift(logItem(today, t(STATES[state] || STATES.idle), say, true));
+    ol.replaceChildren(...items);
+  };
+
   const put = (key, text) => document.querySelectorAll(`[data-live="${key}"]`).forEach((n) => { n.textContent = text; });
   const renderLive = (s) => {
     const stale = Date.now() - Date.parse(s.updated_at) > 20 * 60000;
@@ -416,6 +442,7 @@
     drawGauge(s);
     drawLoss(s);
     drawHistory(s);
+    drawLog(s, state, say);
     firstPaint = false;
   };
 

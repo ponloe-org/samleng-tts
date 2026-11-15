@@ -34,3 +34,5 @@ The project page shows what the running job is doing from optional lines at the 
 # site-km: <the same sentence in Khmer>
 # site-progress: outputs/train/eval/run*_seed*/*/results.csv 17   # files done out of a total
 ```
+
+The page's lab log is `ops/site_log.jsonl`: one line per finished milestone (`date`, then `en` and `km` with `title` and `text`). It travels with the live status, so a new line shows up on the page a few minutes after the file reaches the Mac mini; the running job is always shown as the first entry.

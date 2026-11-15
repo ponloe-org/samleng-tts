@@ -14,6 +14,7 @@ from samleng.site_status import (
     build_status,
     is_run_log,
     job_info,
+    lab_log,
     parse_train_log,
     step_scores,
 )
@@ -80,6 +81,7 @@ def main() -> None:
         run=run,
     )
     status["activity"] = activity(job, info) if job else None
+    status["log"] = lab_log(ROOT / "ops" / "site_log.jsonl")
     args.out.parent.mkdir(parents=True, exist_ok=True)
     tmp = args.out.with_suffix(".tmp")
     tmp.write_text(json.dumps(status, ensure_ascii=False, indent=1), encoding="utf-8")

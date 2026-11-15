@@ -1,5 +1,6 @@
 """Live training status for the project page: where the run is, when it ends, how it scores."""
 
+import json
 import re
 import statistics
 from datetime import UTC, datetime, timedelta
@@ -26,6 +27,18 @@ def job_info(script: str) -> dict:
     run (whose scores to show), progress (`<glob> <total>`: files done out of total).
     """
     return dict(HEADER.findall(script))
+
+
+def lab_log(path: Path) -> list[dict]:
+    """The page's lab log, newest first: one JSON line per entry with date, en and km (title, text)."""
+    if not path.exists():
+        return []
+    rows = [
+        json.loads(line)
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    return sorted(rows, key=lambda r: r["date"], reverse=True)
 
 
 def is_run_log(text: str, run: str) -> bool:

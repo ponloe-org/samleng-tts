@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 
 import pandas as pd
 
-from samleng.site_status import build_status, parse_train_log, step_scores
+from samleng.site_status import build_status, lab_log, parse_train_log, step_scores
 
 LOG = """\
 \x1b[4m\x1b[1m > EPOCH: 3/29\x1b[0m
@@ -121,3 +121,12 @@ def test_is_run_log_matches_whole_run_name():
     assert not is_run_log(
         "outputs/train/distill_v2_clear_translit/x", "distill_v2_clear"
     )
+
+
+def test_lab_log_is_newest_first(tmp_path):
+    f = tmp_path / "log.jsonl"
+    f.write_text(
+        '{"date": "2026-11-09", "en": {}}\n\n{"date": "2026-11-14", "en": {}}\n'
+    )
+    assert [r["date"] for r in lab_log(f)] == ["2026-11-14", "2026-11-09"]
+    assert lab_log(tmp_path / "missing.jsonl") == []
