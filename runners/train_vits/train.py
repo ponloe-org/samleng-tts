@@ -104,6 +104,14 @@ def main() -> None:
         config.load_json(hf_hub_download(REPO, "config.json", revision=REV))
         configure(config, args)
     config.epochs = args.epochs
+    if args.continue_run:
+        # The trainer re-reads the run's own config on resume, so a longer --epochs must be written there.
+        saved = args.continue_run / "config.json"
+        saved.write_text(
+            json.dumps(
+                json.loads(saved.read_text()) | {"epochs": args.epochs}, indent=4
+            )
+        )
     config.num_loader_workers = args.workers
     config.num_eval_loader_workers = args.eval_workers
     config.save_step = args.save_step
