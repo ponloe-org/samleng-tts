@@ -13,3 +13,4 @@ v1n/slr-khm_6438_3285464795 take v1m says តន្ត្រី better (2026-11-
 v1n/slr-khm_3154_1811528314 take v1m says តន្ត្រី better (2026-11-17)
 v2m/mix2-240 "តន្ត្រី" not clear in either take (2026-11-17)
 v2m/slr-khm_6753_2059368188 take v2n is clearly better, also on តន្ត្រី (2026-11-17)
+slr-khm_2499_1012989395 text typo: ឥតគិតថ្ងៃ should be ឥតគិតថ្លៃ (2026-11-17)
