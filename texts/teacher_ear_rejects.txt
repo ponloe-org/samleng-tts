@@ -1,6 +1,9 @@
 # Teacher clips the owner rejected by ear: "<clip id> <note>", or "<batch>/<clip id>" for one take. They are left out of training.
 mtut4-085 "a red car" rushed, "a" read as "ah" (2026-11-12)
 mtut4-083 "an" read as "an a" (2026-11-12)
-short5-042 whole sentence pronounced badly, calm voice (2026-11-17)
+v5m/short5-042 whole sentence pronounced badly (2026-11-17)
+v5n/short5-042 whole sentence pronounced badly (2026-11-17)
 v5m/num5-261 "សែ" in សែសិប pronounced badly; take v5n is good (2026-11-17)
 v4m/mtut4-054 "yesterday" pronounced badly; take v4n is much better (2026-11-17)
+v4m/mtut4-072 "Raise your hand" rushed, far worse than mtut4-006 (2026-11-17)
+v4n/mtut4-072 same phrase, faster still (2026-11-17)
