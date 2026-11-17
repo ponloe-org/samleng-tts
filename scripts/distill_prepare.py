@@ -35,7 +35,7 @@ SENGTHA = {
 }
 # The runner was started from its own folder, so its audio paths are relative to it.
 RUNNER_DIR = ROOT / "runners" / "tts_voxcpm"
-# Clips the owner rejected by ear: "<id> <note>" per line. No automatic check hears these.
+# Clips the owner rejected by ear: "<id> <note>" per line, or "<batch>/<id>" for one take only.
 EAR = ROOT / "texts" / "teacher_ear_rejects.txt"
 
 
@@ -124,7 +124,7 @@ def stats() -> None:
     ear = ear_rejects()
     for r in rows:
         r.pop("reject", None)
-        if r["id"] in ear:
+        if r["id"] in ear or f"{RUN.name}/{r['id']}" in ear:
             r["reject"] = "ear"
         elif reason := distill_reject(r, rate):
             r["reject"] = reason
