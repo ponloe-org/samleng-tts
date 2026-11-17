@@ -150,6 +150,31 @@ def distill_reject(
     return None
 
 
+def ear_rejected(lines: Iterable[str]) -> set[str]:
+    """Ids a native listener rejected: "<id> <note>" per line, or "<batch>/<id>" for one take."""
+    return {x.split()[0] for x in lines if x.strip() and not x.startswith("#")}
+
+
+def pick_take(
+    takes: dict[str, dict], prefer: str | None = None, margin: float = 0.05
+) -> dict:
+    """Choose one row among takes of a sentence ({batch: manifest row}).
+
+    The slowest kept take wins unless it is read clearly worse (CER more than `margin` above the
+    best take): slow audio trains better, but a slower take is sometimes simply a misreading.
+    `prefer` names a batch that wins whenever its take was kept.
+    """
+    kept = {b: r for b, r in takes.items() if "reject" not in r}
+    if not kept:
+        return next(iter(takes.values()))
+    if prefer in kept:
+        return kept[prefer]
+    best = min(r["cer"] for r in kept.values())
+    return min(
+        (r for r in kept.values() if r["cer"] <= best + margin), key=lambda r: r["cps"]
+    )
+
+
 def both_scripts(row: dict, words: dict[str, str]) -> list[dict]:
     """A training row, plus a copy with its English in Khmer script when every word has a spelling.
 

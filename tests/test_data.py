@@ -5,10 +5,12 @@ from samleng.data import (
     LeakCheck,
     distill_problems,
     distill_reject,
+    ear_rejected,
     english_words,
     mixed_group,
     mixed_split,
     parse_line_index,
+    pick_take,
     prepare_audio,
     unsegment,
 )
@@ -176,3 +178,20 @@ def test_strict_unseen_drops_sentences_whose_words_occur_in_khmer_script():
     ]
     split = {"unseen": ["mixed-01", "mixed-02", "mixed-03"], "seen": ["mixed-04"]}
     assert strict_unseen(items, split, leaked) == {"mixed-01"}
+
+
+def test_pick_take_wants_the_slowest_take_that_is_read_well():
+    slow = {"cps": 10.0, "cer": 0.02}
+    fast = {"cps": 13.0, "cer": 0.0}
+    assert pick_take({"m": slow, "n": fast}) is slow
+    garbled = {"cps": 10.0, "cer": 0.3}
+    assert pick_take({"m": garbled, "n": fast}) is fast
+    assert pick_take({"m": slow, "n": fast}, prefer="n") is fast
+    rejected = {"cps": 9.0, "cer": 0.0, "reject": "ear"}
+    assert pick_take({"m": rejected, "n": fast}, prefer="m") is fast
+    assert pick_take({"m": rejected}) is rejected
+
+
+def test_ear_rejected_reads_ids_and_single_takes():
+    lines = ["# note", "", "short5-042 bad", "v5m/num5-261 take 2 is good"]
+    assert ear_rejected(lines) == {"short5-042", "v5m/num5-261"}

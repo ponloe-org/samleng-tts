@@ -16,7 +16,7 @@ import numpy as np
 import pandas as pd
 import soundfile as sf
 
-from samleng.data import TARGET_SR, distill_reject, prepare_audio
+from samleng.data import TARGET_SR, distill_reject, ear_rejected, prepare_audio
 from samleng.eval.cer import khmer_cer, normalize_khmer
 from samleng.eval.spk import SpeakerEncoder
 from samleng.paths import DATA_DIR, OUTPUT_DIR, ROOT
@@ -40,10 +40,11 @@ EAR = ROOT / "texts" / "teacher_ear_rejects.txt"
 
 
 def ear_rejects() -> set[str]:
-    if not EAR.exists():
-        return set()
-    lines = EAR.read_text(encoding="utf-8").splitlines()
-    return {x.split()[0] for x in lines if x.strip() and not x.startswith("#")}
+    return (
+        ear_rejected(EAR.read_text(encoding="utf-8").splitlines())
+        if EAR.exists()
+        else set()
+    )
 
 
 def voice() -> dict:
