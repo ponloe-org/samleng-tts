@@ -66,6 +66,7 @@ uv run python scripts/eval_checkpoint.py outputs/train/my_run/<run folder> --ste
 uv run python scripts/eval_checkpoint.py <run folder> --step 2000 --translit          # English fed in Khmer script
 uv run python scripts/eval_checkpoint.py <run folder> --step 2000 --tag seed1 "--synth=--noise-scale-dp 0 --seed 1"
 uv run python scripts/eval_checkpoint.py <run folder> --voice teacher_clear/0 --pace 0.867   # other target voice and pace
+uv run python scripts/error_report.py my_run --step 2000                                # what it misreads that the teacher does not
 ```
 
 Each call voices the 300 Khmer benchmark sentences, transcribes them, and writes `outputs/train/eval/<run>/summary.md`: paired error rates against the base model per category (Wilcoxon), then guardrails (voice similarity, speech-only duration, silence, clipping). Results are cached per step; a folder remembers its synthesis settings and refuses to be reused with others. `ops/watch_run.sh` does this automatically while training.

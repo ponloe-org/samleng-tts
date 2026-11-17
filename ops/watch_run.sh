@@ -23,6 +23,9 @@ score_new() {
     echo "== step $s $(date)"
     nice -n 10 uv run python scripts/eval_checkpoint.py $run --step $s --notify $opts
     (( both )) && nice -n 10 uv run python scripts/eval_checkpoint.py $run --step $s --translit $opts
+    # What this checkpoint misreads that the teacher does not (errors_<step>.md next to the summary).
+    nice -n 10 uv run python scripts/error_report.py $name --step $s
+    (( both )) && nice -n 10 uv run python scripts/error_report.py ${name}_translit --step $s
     # Training keeps only its last 3 checkpoints; keep every scored one for the final pick.
     mkdir -p outputs/train/keep/$name && cp -n $c outputs/train/keep/$name/
   done
