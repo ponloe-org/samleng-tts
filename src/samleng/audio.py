@@ -35,3 +35,26 @@ def leveled_wav(path) -> bytes:
         subtype="PCM_16",
     )
     return buf.getvalue()
+
+
+def stray_tail(
+    y: np.ndarray, sr: int, min_gap: float = 0.6, max_tail: float = 0.4
+) -> bool:
+    """A short burst of sound after a long silence at the end of a clip (teacher noise)."""
+    if y.ndim > 1:
+        y = y.mean(axis=1)
+    w = max(1, sr // 20)
+    n = len(y) // w * w
+    if not n:
+        return False
+    db = 10 * np.log10((y[:n].reshape(-1, w) ** 2).mean(axis=1) + 1e-18)
+    loud = np.flatnonzero(db > -45)
+    if not len(loud):
+        return False
+    end = start = loud[-1]
+    while start > 0 and db[start - 1] > -45:
+        start -= 1
+    gap = start
+    while gap > 0 and db[gap - 1] < -60:
+        gap -= 1
+    return (start - gap) * w / sr >= min_gap and (end - start + 1) * w / sr <= max_tail

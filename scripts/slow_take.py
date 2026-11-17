@@ -2,13 +2,16 @@
 
 uv run python scripts/slow_take.py v5s v5m v5n [v5r] [--prefer សែសិប=v5n]
 
-Writes outputs/distill/<out>/manifest.jsonl. Ear rejects are applied again, so a clip rejected after
+Writes outputs/distill/<out>/manifest.jsonl. Ear rejects and the stray-noise check are applied again, so a clip rejected after
 its batch was checked stays out. --prefer WORD=BATCH takes that batch for sentences containing WORD.
 """
 
 import argparse
 import statistics
 
+import soundfile as sf
+
+from samleng.audio import stray_tail
 from samleng.data import ear_rejected, pick_take
 from samleng.paths import OUTPUT_DIR, ROOT
 from samleng.runners import read_jsonl, write_jsonl
@@ -32,6 +35,8 @@ def main() -> None:
         for r in read_jsonl(DISTILL / batch / "manifest.jsonl"):
             if r["id"] in ear or f"{batch}/{r['id']}" in ear:
                 r["reject"] = "ear"
+            elif "reject" not in r and stray_tail(*sf.read(r["audio"])):
+                r["reject"] = "noise"
             takes.setdefault(r["id"], {})[batch] = r
     rows = [
         pick_take(

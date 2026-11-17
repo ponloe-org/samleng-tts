@@ -7,3 +7,5 @@ v5m/num5-261 "សែ" in សែសិប pronounced badly; take v5n is good (202
 v4m/mtut4-054 "yesterday" pronounced badly; take v4n is much better (2026-11-17)
 v4m/mtut4-072 "Raise your hand" rushed, far worse than mtut4-006 (2026-11-17)
 v4n/mtut4-072 same phrase, faster still (2026-11-17)
+v1r/mix-441 "Rush hour" rushed, a bit too fast (2026-11-17)
+v2n/mix2-240 "តន្ត្រី" not clear (2026-11-17)

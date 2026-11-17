@@ -107,6 +107,8 @@ def test_distill_reject_checks_voice_then_misreads_then_speed():
     assert distill_reject(ok | {"source": "mixed_v1", "cer": 0.4}, rate) is None
     assert distill_reject(ok | {"source": "mixed_v1", "cer": 0.7}, rate) == "misread"
     assert distill_reject(ok | {"cps": 20.0}, rate) == "speed"
+    assert distill_reject(ok | {"tail": True}, rate) == "noise"
+    assert distill_reject(ok | {"tail": False}, rate) is None
     # Later batches are mixed too: the looser limit must follow the kind, not the version.
     assert distill_reject(ok | {"source": "mixed_v2", "cer": 0.4}, rate) is None
     assert distill_reject(ok | {"source": "numbers_v2", "cer": 0.4}, rate) == "misread"

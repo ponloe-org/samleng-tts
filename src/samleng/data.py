@@ -147,6 +147,8 @@ def distill_reject(
         return "misread"
     if not rate[0] <= row["cps"] <= rate[1]:
         return "speed"
+    if row.get("tail"):
+        return "noise"
     return None
 
 

@@ -16,6 +16,7 @@ import numpy as np
 import pandas as pd
 import soundfile as sf
 
+from samleng.audio import stray_tail
 from samleng.data import TARGET_SR, distill_reject, ear_rejected, prepare_audio
 from samleng.eval.cer import khmer_cer, normalize_khmer
 from samleng.eval.spk import SpeakerEncoder
@@ -121,6 +122,8 @@ def stats() -> None:
     rows = read_jsonl(MANIFEST)
     for r in rows:
         score(r)
+        if "tail" not in r:
+            r["tail"] = stray_tail(*sf.read(r["audio"]))
     rate = rate_window(rows)
     ear = ear_rejects()
     for r in rows:
