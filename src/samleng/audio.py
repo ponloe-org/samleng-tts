@@ -51,9 +51,12 @@ def stray_tail(
     loud = np.flatnonzero(db > -45)
     if not len(loud):
         return False
+    # The burst: the sounding stretch (above -60 dB, soft edges included) that holds the last loud frame.
     end = start = loud[-1]
-    while start > 0 and db[start - 1] > -45:
+    while start > 0 and db[start - 1] >= -60:
         start -= 1
+    while end + 1 < len(db) and db[end + 1] >= -60:
+        end += 1
     gap = start
     while gap > 0 and db[gap - 1] < -60:
         gap -= 1
