@@ -17,3 +17,4 @@ slr-khm_2499_1012989395 text typo: ឥតគិតថ្ងៃ should be ឥត�
 v2m/num2-005 sounds weird (2026-11-17)
 v2n/num2-005 first word អាវយឺត sounds weird too (2026-11-17)
 v2n/num2-016 does not sound like the calm voice (2026-11-17)
+v1n/slr-khm_6753_4153230134 a bit too fast (2026-11-17)
