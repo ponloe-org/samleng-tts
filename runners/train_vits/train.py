@@ -80,6 +80,9 @@ def main() -> None:
         help="mps: Apple GPU via Accelerate",
     )
     ap.add_argument("--limit", type=int, help="use only the first N clips")
+    ap.add_argument(
+        "--init", type=Path, help="start from this checkpoint instead of the base model"
+    )
     ap.add_argument("--epochs", type=int, default=100)
     ap.add_argument("--batch-size", type=int, default=8)
     ap.add_argument("--lr", type=float, default=1e-4)
@@ -132,7 +135,7 @@ def main() -> None:
     if args.continue_run:
         targs = TrainerArgs(continue_path=str(args.continue_run))
     else:
-        start = hf_hub_download(REPO, "best_model.pth", revision=REV)
+        start = args.init or hf_hub_download(REPO, "best_model.pth", revision=REV)
         targs = TrainerArgs(restore_path=start)
     # The trainer only knows CUDA; Accelerate is its route to Apple's GPU.
     targs.use_accelerate = args.device == "mps"
