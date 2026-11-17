@@ -33,6 +33,16 @@ def waveform(wav: Path) -> tuple[float, list[int]]:
     return round(seconds, 2), [round(100 * p / top) for p in peaks]
 
 
+def export(src: Path, label: str, i: str) -> tuple[float, list[int]]:
+    dst = WEB / "audio" / label / f"{i}.m4a"
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    aac = ["-ac", "1", "-c:a", "aac", "-b:a", "64k"]
+    subprocess.run(
+        ["ffmpeg", "-y", "-loglevel", "error", "-i", src, *aac, dst], check=True
+    )
+    return waveform(src)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--ids", nargs="+", required=True)
@@ -42,6 +52,11 @@ def main() -> None:
     ap.add_argument("--ratings", type=Path, help="ratings.jsonl of a MOS study")
     ap.add_argument(
         "--rated", action="append", default=[], help="label=system name in the study"
+    )
+    ap.add_argument(
+        "--hero",
+        type=Path,
+        help="folder with a clip of the first id for the top player",
     )
     args = ap.parse_args()
     systems = dict(s.split("=", 1) for s in args.system)
@@ -56,12 +71,7 @@ def main() -> None:
     for i in args.ids:
         clips = {}
         for label, folder in systems.items():
-            src, dst = Path(folder) / f"{i}.wav", WEB / "audio" / label / f"{i}.m4a"
-            dst.parent.mkdir(parents=True, exist_ok=True)
-            aac = ["-ac", "1", "-c:a", "aac", "-b:a", "64k"]
-            cmd = ["ffmpeg", "-y", "-loglevel", "error", "-i", src, *aac, dst]
-            subprocess.run(cmd, check=True)
-            seconds, peaks = waveform(src)
+            seconds, peaks = export(Path(folder) / f"{i}.wav", label, i)
             got = scores.get((i, rated.get(label, label)))
             clips[label] = {
                 "seconds": seconds,
@@ -72,6 +82,10 @@ def main() -> None:
         samples.append(
             {"id": i, "category": it.category, "text": it.text, "clips": clips}
         )
+    if args.hero:
+        i = args.ids[0]
+        seconds, peaks = export(args.hero / f"{i}.wav", "hero", i)
+        samples[0]["hero"] = {"seconds": seconds, "peaks": peaks}
     path = WEB / "data" / "samples.json"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(samples, ensure_ascii=False) + "\n", encoding="utf-8")

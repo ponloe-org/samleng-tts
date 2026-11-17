@@ -113,11 +113,11 @@
   };
   let heroAudio = null;
   const heroPlayer = (s) => {
-    const clip = s.clips.samleng, root = $("hp"), wf = $("hp-wf");
+    const clip = s.hero || s.clips.samleng, root = $("hp"), wf = $("hp-wf");
     $("hp-say").textContent = s.text;
     wf.innerHTML = clip.peaks.map((v) => `<i style="height:${Math.max(6, v)}%"></i>`).join("");
     const cells = [...wf.children];
-    const audio = new Audio(`/audio/samleng/${s.id}.m4a`);
+    const audio = new Audio(s.hero ? `/audio/hero/${s.id}.m4a` : `/audio/samleng/${s.id}.m4a`);
     audio.preload = "none";
     solo(audio);
     heroAudio = audio;
