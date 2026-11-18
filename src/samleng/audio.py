@@ -60,4 +60,6 @@ def stray_tail(
     gap = start
     while gap > 0 and db[gap - 1] < -60:
         gap -= 1
-    return (start - gap) * w / sr >= min_gap and (end - start + 1) * w / sr <= max_tail
+    return bool(
+        (start - gap) * w / sr >= min_gap and (end - start + 1) * w / sr <= max_tail
+    )

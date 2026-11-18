@@ -16,7 +16,7 @@ def silence(seconds: float) -> np.ndarray:
 
 def test_stray_tail_finds_a_burst_after_the_speech_ended():
     clip = np.concatenate([tone(0.7), silence(0.9), tone(0.3)])
-    assert stray_tail(clip, SR)
+    assert stray_tail(clip, SR) is True  # saved to JSON, so a plain bool
     # A burst that fades in softly (short5-200).
     soft = np.concatenate([tone(0.1, 0.002), tone(0.05, 0.02), tone(0.1, 0.3)])
     assert stray_tail(np.concatenate([tone(0.9), silence(1.0), soft]), SR)
