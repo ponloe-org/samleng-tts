@@ -24,6 +24,40 @@ REV = "c6fde511a839c4f20cdce96e2a35735d493030d2"
 LENGTH_SCALE, NOISE_SCALE, NOISE_SCALE_DP = 1.15, 0.5, 0.6
 
 
+def carried(w: torch.Tensor) -> torch.Tensor:
+    """Whole frames per token from fractional ones, rounding the running total so no time is added."""
+    total = torch.round(torch.cumsum(w, dim=-1))
+    return torch.diff(total, dim=-1, prepend=torch.zeros_like(total[..., :1]))
+
+
+def carry_durations(model) -> None:
+    """Make model.inference use carried() durations instead of rounding every token up."""
+    infer = model.inference
+
+    @torch.inference_mode()
+    def inference(x, aux_input=None):
+        aux = dict(aux_input or {})
+        if aux.get("durations") is None:
+            g = model._get_speaker_conditioning(aux, "emb_g", normalize_embedding=False)
+            g_dp = g if model.args.condition_dp_on_speaker else None
+            h, _, _, x_mask = model.text_encoder(x, model._set_x_lengths(x, aux))
+            if model.args.use_sdp:
+                logw = model.duration_predictor(
+                    h,
+                    x_mask,
+                    g=g_dp,
+                    reverse=True,
+                    noise_scale=model.inference_noise_scale_dp,
+                )
+            else:
+                logw = model.duration_predictor(h, x_mask, g=g_dp)
+            w = torch.exp(logw) * x_mask * model.length_scale
+            aux["durations"] = carried(w).squeeze(0)
+        return infer(x, aux)
+
+    model.inference = inference
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("manifest")
@@ -44,6 +78,12 @@ def main() -> None:
         default=NOISE_SCALE_DP,
         help="randomness of the timing; lower = steadier rhythm",
     )
+    ap.add_argument(
+        "--durations",
+        choices=("ceil", "carry"),
+        default="ceil",
+        help="frames per token: round each up (Coqui) or round the running total",
+    )
     args = ap.parse_args()
 
     ckpt = args.checkpoint or hf_hub_download(REPO, "best_model.pth", revision=REV)
@@ -53,6 +93,8 @@ def main() -> None:
     model.length_scale = args.length_scale
     model.inference_noise_scale = args.noise_scale
     model.inference_noise_scale_dp = args.noise_scale_dp
+    if args.durations == "carry":
+        carry_durations(model)
     sr = synth.output_sample_rate
 
     out_dir = Path(args.out_dir)
