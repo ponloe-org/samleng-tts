@@ -33,6 +33,10 @@ def main() -> None:
     ap.add_argument("manifest")
     ap.add_argument("out_dir")
     ap.add_argument("--reference-wav", help="voice to clone (16kHz+, a few seconds)")
+    ap.add_argument(
+        "--prompt-text",
+        help="the reference clip's words: continue from the clip instead of starting cold",
+    )
     ap.add_argument("--cfg", type=float, default=2.0)
     ap.add_argument("--steps", type=int, default=10)
     ap.add_argument("--seed", type=int, default=0)
@@ -63,6 +67,11 @@ def main() -> None:
         items = [json.loads(line) for line in f if line.strip()]
 
     extra = {"reference_wav_path": args.reference_wav} if args.reference_wav else {}
+    if args.prompt_text:
+        extra |= {
+            "prompt_wav_path": args.reference_wav,
+            "prompt_text": args.prompt_text,
+        }
     results = out_dir / "results.jsonl"
     done = set()
     if args.resume and results.exists():
