@@ -390,7 +390,42 @@
     km: ["មករា", "កុម្ភៈ", "មីនា", "មេសា", "ឧសភា", "មិថុនា", "កក្កដា", "សីហា", "កញ្ញា", "តុលា", "វិច្ឆិកា", "ធ្នូ"],
   };
   const day = (iso) => { const [y, m, d] = iso.split("-"); return `${d} ${MONTHS[km ? "km" : "en"][m - 1]} ${y}`; };
-  const logItem = (date, title, text, now) => {
+  // Every entry with audio plays the same two sentences, so the progress can be heard.
+  const LOG_CLIPS = [["pure-34", { en: "Proverb", km: "សុភាសិត" }], ["pure-01", { en: "Everyday", km: "ប្រយោគប្រចាំថ្ងៃ" }]];
+  const logAudio = new Map();
+  const logClips = (audio) => {
+    const box = document.createElement("div");
+    box.className = "log-clips";
+    audio.forEach((a) => {
+      const row = document.createElement("div");
+      const name = document.createElement("span");
+      name.textContent = t(a);
+      row.append(name);
+      LOG_CLIPS.forEach(([id, label]) => {
+        const src = `/audio/log/${a.src}/${id}.m4a`;
+        const b = document.createElement("button");
+        b.type = "button";
+        b.textContent = t(label);
+        b.addEventListener("click", () => {
+          let au = logAudio.get(src);
+          if (!au) {
+            au = new Audio(src);
+            solo(au);
+            // The log is redrawn every few minutes: mark whichever button started the clip.
+            au.addEventListener("play", () => au.btn.classList.add("on"));
+            ["pause", "ended"].forEach((ev) => au.addEventListener(ev, () => au.btn.classList.remove("on")));
+            logAudio.set(src, au);
+          }
+          au.btn = b;
+          if (au.paused) { au.currentTime = 0; au.play(); } else au.pause();
+        });
+        row.append(b);
+      });
+      box.append(row);
+    });
+    return box;
+  };
+  const logItem = (date, title, text, now, audio) => {
     const li = document.createElement("li");
     if (now) li.className = "now";
     [["time", "", day(date)], ["h3", "t-h3", title], ["p", "t-small", text]].forEach(([tag, cls, txt]) => {
@@ -399,6 +434,7 @@
       n.textContent = txt;
       li.append(n);
     });
+    if (audio && audio.length) li.append(logClips(audio));
     return li;
   };
   // The lab log comes with the live status; the running job is its first entry.
@@ -406,7 +442,7 @@
     const ol = document.querySelector(".log");
     if (!ol || !s.log || !s.log.length) return;
     const today = new Date(s.updated_at).toLocaleDateString("en-CA", { timeZone: TZ });
-    const items = s.log.map((e) => { const p = km ? e.km || e.en : e.en; return logItem(e.date, p.title, p.text); });
+    const items = s.log.map((e) => { const p = km ? e.km || e.en : e.en; return logItem(e.date, p.title, p.text, false, e.audio); });
     if (say) items.unshift(logItem(today, t(STATES[state] || STATES.idle), say, true));
     ol.replaceChildren(...items);
   };
