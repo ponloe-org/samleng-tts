@@ -25,3 +25,4 @@ wiki3-841 date without ខែ ("ថ្ងៃទីដប់ ធ្នូ"): read
 wiki3-355 same date pattern without ខែ (2026-11-19)
 wiki3-612 same date pattern without ខែ (2026-11-19)
 wiki3-1665 same date pattern without ខែ (2026-11-19)
+v3n/wiki3-2476 "ម្ភៃ" said wrong (2026-11-19)
