@@ -51,6 +51,12 @@ def main() -> None:
     ap.add_argument(
         "--hints", help="JSON {word: respelling} for words the model misreads"
     )
+    ap.add_argument(
+        "--max-new",
+        type=int,
+        default=0,
+        help="stop after N new clips (memory creeps up on MPS; jobs loop with --resume)",
+    )
     args = ap.parse_args()
     hints = (
         json.loads(Path(args.hints).read_text(encoding="utf-8")) if args.hints else {}
@@ -82,10 +88,14 @@ def main() -> None:
     if args.resume and results.exists():
         with open(results, encoding="utf-8") as f:
             done = {json.loads(line)["id"] for line in f if line.strip()}
+    new = 0
     with open(results, "a" if done else "w", encoding="utf-8") as out:
         for it in items:
             if it["id"] in done:
                 continue
+            if args.max_new and new >= args.max_new:
+                break
+            new += 1
             # Per-item seed: same audio for a sentence regardless of run order.
             torch.manual_seed(it.get("seed", args.seed))
             # Voice design: an optional description like "young female teacher" in front.
@@ -115,6 +125,8 @@ def main() -> None:
             out.write(json.dumps(row) + "\n")
             out.flush()
             print(f"{it['id']}: {row['seconds']:.1f}s audio in {gen:.1f}s", flush=True)
+            if device == "mps":
+                torch.mps.empty_cache()
 
 
 if __name__ == "__main__":
