@@ -153,3 +153,16 @@ def test_khmer_script_leaves_no_latin_in_bench_mixed():
         elif it.category != "english":
             # Without English words it is the plain spoken form.
             assert khmer_script(it.text) == verbalize(it.text), it.id
+
+
+def test_teacher_digits_writes_tens_numbers_as_khmer_digits():
+    from samleng.text import teacher_digits
+
+    assert teacher_digits("ខ្ញុំទិញផ្លែប៉ោមម្ភៃផ្លែ ហើយផ្លែក្រូចសែសិបផ្លែ ។") == (
+        "ខ្ញុំទិញផ្លែប៉ោម ២០ ផ្លែ ហើយផ្លែក្រូច ៤០ ផ្លែ ។"
+    )
+    assert teacher_digits("ឆ្នាំមួយពាន់ប្រាំបួនរយម្ភៃប្រាំ") == "ឆ្នាំ ១៩២៥"
+    assert teacher_digits("ទៅជាមួយម្ភៃនាក់") == "ទៅជាមួយ ២០ នាក់"
+    # Left alone: no tens word, part of another word, or a number that can't be read back.
+    for text in ("ប្រាំពីរ", "ពីរោះ", "ខ្សែសិប", "ម្ភៃពីរោះ", "មួយចុចប្រាំ", "មួយលានពីររយហាសិបពាន់"):
+        assert teacher_digits(text) == text

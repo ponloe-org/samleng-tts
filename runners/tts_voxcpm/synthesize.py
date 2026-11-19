@@ -89,7 +89,7 @@ def main() -> None:
             # Per-item seed: same audio for a sentence regardless of run order.
             torch.manual_seed(it.get("seed", args.seed))
             # Voice design: an optional description like "young female teacher" in front.
-            spoken = it["text"]
+            spoken = it.get("speak", it["text"])
             for word, respelled in hints.items():
                 spoken = spoken.replace(word, respelled)
             text = args.lead + spoken

@@ -279,3 +279,76 @@ def khmer_script(text: str) -> str:
     """Spoken form with every known English word in Khmer script (what variant B reads)."""
     words = {**EN_KM, **train_words()}
     return transliterate(expand_acronyms(verbalize(text)), words)
+
+
+_UNITS = {"សូន្យ": 0, "មួយ": 1, "ពីរ": 2, "បី": 3, "បួន": 4, "ប្រាំ": 5, "ដប់": 10}
+_TENS = {
+    "ម្ភៃ": 20,
+    "សាមសិប": 30,
+    "សែសិប": 40,
+    "ហាសិប": 50,
+    "ហុកសិប": 60,
+    "ចិតសិប": 70,
+    "ប៉ែតសិប": 80,
+    "កៅសិប": 90,
+}
+_BIG = {"ពាន់": 1000, "ម៉ឺន": 10_000, "សែន": 100_000}
+_NUM_TOKEN = re.compile(
+    "|".join(sorted([*_UNITS, *_TENS, *_BIG, "រយ", "លាន"], key=len, reverse=True))
+)
+_KHMER_DIGITS = str.maketrans("0123456789", "០១២៣៤៥៦៧៨៩")
+
+
+def _number_value(tokens: list[str]) -> int:
+    total = cur = 0
+    for t in tokens:
+        if t == "រយ":
+            cur = (cur or 1) * 100
+        elif t in _BIG:
+            total, cur = total + (cur or 1) * _BIG[t], 0
+        elif t == "លាន":
+            total, cur = (total + (cur or 1)) * 1_000_000, 0
+        else:
+            cur += _UNITS[t] if t in _UNITS else _TENS[t]
+    return total + cur
+
+
+def _attached(text: str, i: int) -> bool:
+    """True if position i is inside a cluster (a vowel sign, sign or subscript)."""
+    return 0 <= i < len(text) and ("ា" <= text[i] <= "៓" or text[i] == "៝")
+
+
+def teacher_digits(text: str) -> str:
+    """Write spelled-out numbers that contain a tens word as Khmer digits.
+
+    The teacher reads ៤០ more reliably than សែសិប (owner's ear, 11-19). A number is only
+    rewritten when spelling the digits back gives exactly the same words.
+    """
+    tokens = [(m.start(), m.end()) for m in _NUM_TOKEN.finditer(text)]
+    runs, run = [], []
+    for span in tokens:
+        if run and span[0] != run[-1][1]:
+            runs.append(run)
+            run = []
+        run.append(span)
+    if run:
+        runs.append(run)
+    out, last = [], 0
+    for run in runs:
+        # Only leading words may be dropped (មួយ in ជាមួយ); a cut-off end would change the number.
+        e = run[-1][1]
+        if _attached(text, e):
+            continue
+        for a in range(len(run)):
+            s = run[a][0]
+            words = [text[x:y] for x, y in run[a:]]
+            if text[s - 1 : s] == "\u17d2" or not set(words) & _TENS.keys():
+                continue
+            n = _number_value(words)
+            if verbalize(str(n)) == text[s:e]:
+                lead = "" if s == 0 or text[s - 1].isspace() else " "
+                tail = "" if e == len(text) or text[e].isspace() else " "
+                out += [text[last:s], lead + str(n).translate(_KHMER_DIGITS) + tail]
+                last = e
+                break
+    return "".join(out) + text[last:]
