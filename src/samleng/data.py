@@ -129,6 +129,28 @@ def distill_problems(text: str, leak: LeakCheck, banned: set[str]) -> list[str]:
     return problems
 
 
+# Number words whose loss the ASR can hear; a take that drops one is not trained on.
+NUMBER_WORDS = (
+    "សែសិប",
+    "ម្ភៃ",
+    "សាមសិប",
+    "ហាសិប",
+    "ហុកសិប",
+    "ចិតសិប",
+    "ប៉ែតសិប",
+    "កៅសិប",
+    "មួយរយ",
+    "ពាន់",
+    "ដប់",
+)
+
+
+def number_misheard(text: str, asr: str) -> bool:
+    """True if the ASR heard a number word fewer times than the text has it."""
+    text, asr = text.replace(" ", ""), asr.replace(" ", "")
+    return any(text.count(w) > asr.count(w) for w in NUMBER_WORDS)
+
+
 def distill_reject(
     row: dict,
     rate: tuple[float, float],
@@ -145,6 +167,8 @@ def distill_reject(
     limit = max_cer_mixed if row["source"].startswith("mixed") else max_cer
     if row["cer"] > limit:
         return "misread"
+    if "asr" in row and number_misheard(row["text"], row["asr"]):
+        return "number"
     if not rate[0] <= row["cps"] <= rate[1]:
         return "speed"
     if row.get("tail"):

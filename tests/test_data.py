@@ -114,6 +114,19 @@ def test_distill_reject_checks_voice_then_misreads_then_speed():
     assert distill_reject(ok | {"source": "numbers_v2", "cer": 0.4}, rate) == "misread"
 
 
+def test_distill_reject_drops_takes_with_a_misheard_number():
+    rate = (10.0, 16.0)
+    row = {
+        "source": "wiki_v3",
+        "spk": 0.97,
+        "cer": 0.05,
+        "cps": 13.0,
+        "text": "ឆ្នាំមួយពាន់ប្រាំបួនរយម្ភៃប្រាំ ។",
+    }
+    assert distill_reject(row | {"asr": "ឆ្នាំ មួយពាន់ប្រាំបួនរយ ម្ភៃប្រាំ"}, rate) is None
+    assert distill_reject(row | {"asr": "ឆ្នាំមួយពាន់ប្រាំបួនរយយំភ័យប្រាំ"}, rate) == "number"
+
+
 def test_mixed_group_relabels_only_mixed():
     split = {"unseen": ["mixed-01"], "seen": ["mixed-02"], "partial": ["mixed-03"]}
     assert mixed_group("mixed-01", "mixed", split) == "mixed_unseen"
