@@ -30,3 +30,5 @@ wiki3-2450 source typos គឹ (គឺ), ដឺកនាំ (ដឹកនាំ)
 wiki3-2238 source typo គឹ (គឺ) (2026-11-19)
 wiki3-2080 source typos ដឺកនាំ (ដឹកនាំ), ចំនេះ (ចំណេះ) (2026-11-19)
 wiki3-1778 source typo ដឺក្រ (ដឺក្រេ) (2026-11-19)
+wiki3-403 ឧទ្យាន said wrong (teacher right ~1 in 6) + typo មុនីវង្យ
+wiki3-1408 ឧទ្យាន said wrong (teacher right ~1 in 6)
