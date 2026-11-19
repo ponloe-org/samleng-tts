@@ -37,6 +37,11 @@ def main() -> None:
         "--prompt-text",
         help="the reference clip's words: continue from the clip instead of starting cold",
     )
+    ap.add_argument(
+        "--lead",
+        default="",
+        help="text put before every sentence, e.g. a pause mark after the prompt",
+    )
     ap.add_argument("--cfg", type=float, default=2.0)
     ap.add_argument("--steps", type=int, default=10)
     ap.add_argument("--seed", type=int, default=0)
@@ -87,7 +92,8 @@ def main() -> None:
             spoken = it["text"]
             for word, respelled in hints.items():
                 spoken = spoken.replace(word, respelled)
-            text = f"({it['control']}){spoken}" if it.get("control") else spoken
+            text = args.lead + spoken
+            text = f"({it['control']}){text}" if it.get("control") else text
             t = time.time()
             wav = model.generate(
                 text=text,
