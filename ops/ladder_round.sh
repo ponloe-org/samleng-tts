@@ -21,3 +21,10 @@ B=$(uv run python scripts/ladder.py best $RUN --steps $STEPS) || exit 1
 CK=outputs/train/keep/$RUN/checkpoint_$B.pth
 [[ -e $CK ]] || CK=$D/checkpoint_$B.pth
 uv run python scripts/ladder.py challenge $RUN --steps $STEPS --checkpoint $CK --label "$LABEL" || exit 1
+# Free the disk (a run leaves ~10 GB): keep only the scored steps, plus the start point for later runs.
+for f in $D/*.pth(N.); do [[ $f -ef $CK ]] || rm -f $f; done
+for f in outputs/train/keep/$RUN/checkpoint_*.pth(N); do
+  s=${${f:t:r}#checkpoint_}
+  (( ${STEPS[(Ie)$s]} )) || rm -f $f
+done
+df -h . | tail -1
