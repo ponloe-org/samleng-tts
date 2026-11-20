@@ -140,7 +140,7 @@ def main() -> None:
     if args.continue_run:
         targs = TrainerArgs(continue_path=str(args.continue_run))
     else:
-        start = args.init or hf_hub_download(REPO, "best_model.pth", revision=REV)
+        start = str(args.init or hf_hub_download(REPO, "best_model.pth", revision=REV))
         targs = TrainerArgs(restore_path=start)
     # The trainer only knows CUDA; Accelerate is its route to Apple's GPU.
     targs.use_accelerate = args.device == "mps"
