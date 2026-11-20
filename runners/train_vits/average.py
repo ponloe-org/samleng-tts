@@ -34,6 +34,7 @@ def main() -> None:
             "config": ckpts[-1]["config"],
             "model": avg,
             "step": max(c["step"] for c in ckpts),
+            "epoch": max(c.get("epoch", 0) for c in ckpts),
             "averaged_from": [str(p) for p in args.checkpoints],
         },
         args.out,

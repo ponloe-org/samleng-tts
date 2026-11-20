@@ -86,6 +86,11 @@ def main() -> None:
     ap.add_argument("--epochs", type=int, default=100)
     ap.add_argument("--batch-size", type=int, default=8)
     ap.add_argument("--lr", type=float, default=1e-4)
+    ap.add_argument(
+        "--lr-final",
+        type=float,
+        help="decay the learning rate each pass so it ends at this fraction of --lr (new runs only)",
+    )
     ap.add_argument("--eval-clips", type=int, default=4)
     # Each loader worker is a separate process with its own memory; on a 16 GB Mac, 8 train
     # workers plus 4 eval workers got an eval worker killed at the end of the first epoch.
@@ -158,6 +163,10 @@ def configure(config: VitsConfig, args: argparse.Namespace) -> None:
     config.output_path = str(args.out_dir)
     config.batch_size = config.eval_batch_size = args.batch_size
     config.lr_gen = config.lr_disc = args.lr
+    if args.lr_final:
+        gamma = args.lr_final ** (1 / args.epochs)
+        config.lr_scheduler_gen_params = {"gamma": gamma, "last_epoch": -1}
+        config.lr_scheduler_disc_params = {"gamma": gamma, "last_epoch": -1}
     config.mixed_precision = False
     config.eval_split_size = args.eval_clips
     config.test_sentences = []
