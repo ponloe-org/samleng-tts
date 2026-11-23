@@ -7,6 +7,7 @@ from difflib import SequenceMatcher
 import pandas as pd
 
 from samleng.eval.cer import mixed_cer, normalize_khmer
+from samleng.eval.report import is_asr_loop
 from samleng.text import transliterate
 
 COENG = "្"
@@ -46,8 +47,11 @@ def confusions(ref: str, hyp: str) -> list[tuple[str, str]]:
 def worst_sentences(
     student: pd.DataFrame, teacher: pd.DataFrame, top: int = 25
 ) -> pd.DataFrame:
-    """Sentences where the student's error is furthest above the teacher's."""
+    """Sentences where the student's error is furthest above the teacher's (ASR loops left out)."""
     df = student.merge(teacher[["id", "hyp"]], on="id", suffixes=("", "_teacher"))
+    df = df[
+        [not is_asr_loop(r, h) for r, h in zip(df.ref, df.hyp.fillna(""), strict=True)]
+    ]
     df["cer"] = [mixed_cer(r, h) for r, h in zip(df.ref, df.hyp, strict=True)]
     df["cer_teacher"] = [
         mixed_cer(r, h) for r, h in zip(df.ref, df.hyp_teacher, strict=True)

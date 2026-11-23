@@ -1,6 +1,6 @@
 """List what a scored checkpoint misreads that the teacher reads correctly.
 
-uv run python scripts/error_report.py distill_v2_calm --step 6000 [--teacher teacher_clear/0]
+uv run python scripts/error_report.py distill_v2_calm --step 6000 [--teacher teacher_calm_cont/0]
 
 Reads the cached results of eval_checkpoint.py and writes errors_<step>.md next to the run's summary.
 """
@@ -19,7 +19,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("run", help="folder name under outputs/train/eval")
     ap.add_argument("--step", type=int, required=True)
-    ap.add_argument("--teacher", default="teacher_clear/0")
+    ap.add_argument("--teacher", default="teacher_calm_cont/0")
     ap.add_argument("--top", type=int, default=25)
     args = ap.parse_args()
 

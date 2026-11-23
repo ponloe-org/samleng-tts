@@ -27,6 +27,7 @@ def test_reports_only_what_the_teacher_gets_right():
             ("a", "មេឃស្រឡះ", "មេឃស្រឡះ"),
             ("b", "កូនៗរៀន", "កូនកោររៀន"),
             ("c", "មេឃល្អ", "មេឃល្អ"),
+            ("d", "ល្អ", "ល្អ"),
         ]
     )
     student = frame(
@@ -34,6 +35,7 @@ def test_reports_only_what_the_teacher_gets_right():
             ("a", "មេឃស្រឡះ", "នេះស្រឡះ"),
             ("b", "កូនៗរៀន", "កូនកោររៀន"),
             ("c", "មេឃល្អ", "នេះល្អ"),
+            ("d", "ល្អ", "ល្អណាស់ល្អណាស់ល្អណាស់"),
         ]
     )
     assert student_only_confusions(student, teacher) == [("មេឃ", "នេះ", 2, 0)]
