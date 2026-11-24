@@ -84,6 +84,9 @@ def main() -> None:
             "prompt_wav_path": args.reference_wav,
             "prompt_text": args.prompt_text,
         }
+        # VoxCPM 1.x clones only by continuing the prompt clip.
+        if type(model.tts_model).__name__ != "VoxCPM2Model":
+            extra.pop("reference_wav_path", None)
     results = out_dir / "results.jsonl"
     done = set()
     if args.resume and results.exists():
