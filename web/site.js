@@ -31,6 +31,7 @@
   const SYSTEMS = {
     base: { name: { km: "ម៉ូដែលដើម", en: "Base model" }, sub: { km: "មុនពេលយើងហ្វឹកហាត់", en: "Before our training" } },
     samleng: { name: { km: "Samleng v1", en: "Samleng v1" }, sub: { km: "36 លានប៉ារ៉ាម៉ែត្រ · ដំណើរការលើ CPU", en: "36M parameters · runs on a CPU" } },
+    latest: { name: { km: "Samleng ថ្មីបំផុត", en: "Samleng, latest" }, sub: { km: "សំឡេងស្ងប់ថ្មី · កំពុងហ្វឹកហាត់", en: "New calm voice · in training" } },
     teacher: { name: { km: "គ្រូ · VoxCPM2", en: "Teacher · VoxCPM2" }, sub: { km: "2 ពាន់លានប៉ារ៉ាម៉ែត្រ · ត្រូវការ GPU", en: "2B parameters · needs a GPU" } },
   };
   const SAMPLES = {
@@ -62,7 +63,7 @@
     audios = Object.entries(s.clips).map(([key, clip]) => {
       const sys = SYSTEMS[key];
       const row = document.createElement("div");
-      row.className = "player" + (key === "samleng" ? " ours" : "");
+      row.className = "player" + (key === "latest" ? " ours" : "");
       const bars = clip.peaks.map((v) => `<i style="height:${Math.max(6, v)}%"></i>`).join("");
       row.innerHTML = `<button type="button" class="play" aria-label="${t(sys.name)}">${ICONS}</button>
         <div class="who"><b>${t(sys.name)}</b></div>
