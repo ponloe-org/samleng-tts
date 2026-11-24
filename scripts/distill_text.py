@@ -4,6 +4,7 @@ uv run python scripts/distill_text.py                # v1: 500 mixed + 1,000 Ope
 uv run python scripts/distill_text.py --version v2   # v2: new mixed + numbers + unused OpenSLR
 uv run python scripts/distill_text.py --version v3   # v3: Khmer Wikipedia sentences
 uv run python scripts/distill_text.py --version v5   # v5: conversation, maths, word drills
+uv run python scripts/distill_text.py --version v6   # v6: weak words, repeat sign, English
 Writes outputs/distill/<version>/tts_in.jsonl ({"id", "source", "text"}), ready for the VoxCPM2 runner.
 """
 
@@ -43,6 +44,11 @@ TEXTS = {
         ("talk_v5", "distill_talk_v5.txt", "talk5"),
         ("numbers_v5", "distill_maths_v5.txt", "num5"),
         ("mixed_v5", "distill_mixed_v5.txt", "mix5"),
+    ],
+    # Weak words: rare words the student misreads, repeat sign, small words, numbers, English.
+    "v6": [
+        ("words_v6", "distill_words_v6.txt", "words6"),
+        ("mixed_v6", "distill_mixed_v6.txt", "mix6"),
     ],
 }
 
