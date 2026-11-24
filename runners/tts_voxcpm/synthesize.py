@@ -57,6 +57,7 @@ def main() -> None:
         default=0,
         help="stop after N new clips (memory creeps up on MPS; jobs loop with --resume)",
     )
+    ap.add_argument("--model", help="local model folder instead of the pinned VoxCPM2")
     args = ap.parse_args()
     hints = (
         json.loads(Path(args.hints).read_text(encoding="utf-8")) if args.hints else {}
@@ -65,7 +66,7 @@ def main() -> None:
     device = pick_device()
     # torch.compile optimizations are CUDA-only.
     model = VoxCPM.from_pretrained(
-        snapshot_download(MODEL_ID, revision=REVISION),
+        args.model or snapshot_download(MODEL_ID, revision=REVISION),
         load_denoiser=False,
         optimize=device == "cuda",
         device=device,
