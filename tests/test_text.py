@@ -166,3 +166,9 @@ def test_teacher_digits_writes_tens_numbers_as_khmer_digits():
     # Left alone: no tens word, part of another word, or a number that can't be read back.
     for text in ("ប្រាំពីរ", "ពីរោះ", "ខ្សែសិប", "ម្ភៃពីរោះ", "មួយចុចប្រាំ", "មួយលានពីររយហាសិបពាន់"):
         assert teacher_digits(text) == text
+
+
+def test_written_dates_get_month_and_year_words():
+    assert verbalize("10 ធ្នូ 1896") == verbalize("ថ្ងៃទី 10 ខែធ្នូ ឆ្នាំ 1896")
+    assert verbalize("នៅថ្ងៃទី១៥ មករា ២០២៤") == "នៅថ្ងៃទីដប់ប្រាំ ខែមករា ឆ្នាំ ពីរពាន់ម្ភៃបួន"
+    assert verbalize("ថ្ងៃទី 7 ខែមករា") == "ថ្ងៃទី ប្រាំពីរ ខែមករា"

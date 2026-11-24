@@ -48,6 +48,12 @@ _MONTHS = (
     "ធ្នូ",
 )
 _DAY_WORDS = ("ថ្ងៃទី", "ថ្ងៃ")
+# "10 ធ្នូ 1896": a written date without ខែ/ឆ្នាំ (common in Wikipedia) reads as a broken phrase.
+_NAMED_DATE = re.compile(
+    r"(?<![\d០-៩])([\d០-៩]{1,2})\s*("
+    + "|".join(_MONTHS)
+    + r")(?:\s*([\d០-៩]{4}))?(?![\d០-៩])"
+)
 _DATE = re.compile(r"(?<![\d/])(\d{1,2})/(\d{1,2})/(\d{4})(?![\d/])")
 # Two-part only, so 14/04/2026 is left to the date rule above.
 _FRACTION = re.compile(r"(?<![\d/])(\d+)/(\d+)(?![\d/])")
@@ -85,6 +91,14 @@ def _date(m: re.Match) -> str:
     return f"{lead}{day} ខែ{_MONTHS[month - 1]} ឆ្នាំ {int(m[3])}"
 
 
+def _named_date(m: re.Match) -> str:
+    if not 1 <= int(m[1]) <= 31:
+        return m[0]
+    lead = "" if _after_day_word(m) else "ថ្ងៃទី "
+    year = f" ឆ្នាំ {m[3]}" if m[3] else ""
+    return f"{lead}{m[1]} ខែ{m[2]}{year}"
+
+
 def _fraction(m: re.Match) -> str:
     # After ថ្ងៃ/ថ្ងៃទី, 14/04 is a day and month.
     if _after_day_word(m):
@@ -101,6 +115,7 @@ def verbalize(text: str) -> str:
     text = re.sub(r"(?<=\d),(?=\d{3}(?!\d))", "", text)
     text = _TIME.sub(_spoken_time, text)
     text = _DATE.sub(_date, text)
+    text = _NAMED_DATE.sub(_named_date, text)
     text = _FRACTION.sub(_fraction, text)
     text = _SCORE.sub(r"\1 \2 ទល់ \3", text)
     text = text.replace("%", " ភាគរយ").replace("°C", " អង្សាសេ")
