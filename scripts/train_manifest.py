@@ -1,6 +1,7 @@
 """Join checked teacher batches into one training manifest, English in both scripts.
 
 uv run python scripts/train_manifest.py v1c v2c v3c v4c v5c --out outputs/train/distill_v2_clear/manifest.jsonl
+uv run python scripts/train_manifest.py v7w v7x v7y --suffix --out takes.jsonl   # every take of a sentence
 
 Takes every kept clip of outputs/distill/<batch>/manifest.jsonl. A clip with English words gets
 a second row with the same audio and the words in Khmer script (samleng.data.both_scripts).
@@ -22,6 +23,9 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("batches", nargs="+")
     ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument(
+        "--suffix", action="store_true", help="end ids with the batch's last letter"
+    )
     args = ap.parse_args()
 
     split = json.loads(
@@ -30,7 +34,7 @@ def main() -> None:
     banned = set(split["banned"])
     words = {**EN_KM, **train_words()}
     batch_rows = [
-        r | {"batch": batch}
+        r | {"batch": batch, "id": r["id"] + (batch[-1] if args.suffix else "")}
         for batch in args.batches
         for r in read_jsonl(OUTPUT_DIR / "distill" / batch / "manifest.jsonl")
     ]

@@ -5,6 +5,7 @@ uv run python scripts/distill_text.py --version v2   # v2: new mixed + numbers +
 uv run python scripts/distill_text.py --version v3   # v3: Khmer Wikipedia sentences
 uv run python scripts/distill_text.py --version v5   # v5: conversation, maths, word drills
 uv run python scripts/distill_text.py --version v6   # v6: weak words, repeat sign, English
+uv run python scripts/distill_text.py --version v7   # v7: words common in real speech, rare in ours
 Writes outputs/distill/<version>/tts_in.jsonl ({"id", "source", "text"}), ready for the VoxCPM2 runner.
 """
 
@@ -50,6 +51,8 @@ TEXTS = {
         ("words_v6", "distill_words_v6.txt", "words6"),
         ("mixed_v6", "distill_mixed_v6.txt", "mix6"),
     ],
+    # Everyday words common in real Khmer speech transcripts but rare in our training text.
+    "v7": [("words_v7", "distill_words_v7.txt", "words7")],
 }
 
 
