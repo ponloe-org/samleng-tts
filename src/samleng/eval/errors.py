@@ -97,3 +97,12 @@ def hard_clusters(
         (w, n, theirs[w]) for w, n in ours.items() if n >= min_count and n > theirs[w]
     ]
     return sorted(rows, key=lambda r: (r[2] - r[1], r[0]))
+
+
+def word_read(ref: str, hyp: str, word: str) -> bool | None:
+    """None if the sentence lacks the word, else whether the ASR heard it as often as written."""
+    w = normalize_khmer(word, spell_numbers=False)
+    wanted = normalize_khmer(ref).count(w)
+    if not wanted:
+        return None
+    return normalize_khmer(hyp).count(w) >= wanted

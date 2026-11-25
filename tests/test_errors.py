@@ -4,6 +4,7 @@ from samleng.eval.errors import (
     confusions,
     hard_clusters,
     student_only_confusions,
+    word_read,
     worst_sentences,
 )
 
@@ -43,3 +44,11 @@ def test_reports_only_what_the_teacher_gets_right():
     worst = worst_sentences(student, teacher, top=2)
     assert set(worst.id) == {"a", "c"}
     assert (worst.cer_teacher == 0).all()
+
+
+def test_word_read():
+    assert word_read("ខ្ញុំទិញនំ ។", "ខ្ញុំទិញនំ", "នំ") is True
+    assert word_read("ខ្ញុំទិញនំ ។", "ខ្ញុំទិញនុំ", "នំ") is False
+    assert word_read("ខ្ញុំទិញនំ ។", "ខ្ញុំទិញនំ", "កាហ្វេ") is None
+    assert word_read("នំ និង នំ", "នំនិង", "នំ") is False
+    assert word_read("ព្រះស៊ីសុវត្ថិ", "ព្រះស៊ីសុវត្ថិ", "ព្រះស៊ីសុវត្ថិ") is True
