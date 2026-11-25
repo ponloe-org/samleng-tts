@@ -32,3 +32,5 @@ wiki3-2080 source typos ដឺកនាំ (ដឹកនាំ), ចំនេះ
 wiki3-1778 source typo ដឺក្រ (ដឺក្រេ) (2026-11-19)
 wiki3-403 source typo មុនីវង្យ (មុនីវង្ស)
 v3m/wiki3-1408 ឧទ្យាន said wrong in the cold take; warm take good (owner)
+v6w/words6-040 សុវត្ថិ said badly (owner, 2026-11-25)
+v6w/words6-046 adds a sound after លីត្រ (owner, 2026-11-25)
