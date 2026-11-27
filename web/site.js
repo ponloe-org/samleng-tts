@@ -449,6 +449,16 @@
   };
 
   const put = (key, text) => document.querySelectorAll(`[data-live="${key}"]`).forEach((n) => { n.textContent = text; });
+  // The "Samleng, latest" results row follows the current best model (bars are scaled to 12%).
+  const KM_DIGITS = "០១២៣៤៥៦៧៨៩";
+  const drawChampion = (c) => {
+    if (!c) return;
+    put("champ-all", `${c.all.toFixed(1)}%`);
+    if (c.mixed_unseen != null) put("champ-unseen", `${c.mixed_unseen.toFixed(1)}%`);
+    const d = day(c.date);
+    put("champ-date", km ? d.replace(/\d/g, (x) => KM_DIGITS[x]) : d);
+    document.querySelectorAll('[data-live="champ-bar"]').forEach((n) => n.style.setProperty("--v", (100 * c.all / 12).toFixed(1)));
+  };
   const renderLive = (s) => {
     const stale = Date.now() - Date.parse(s.updated_at) > 20 * 60000;
     const state = stale ? "offline" : s.state;
@@ -480,6 +490,7 @@
     drawLoss(s);
     drawHistory(s);
     drawLog(s, state, say);
+    drawChampion(s.champion);
     firstPaint = false;
   };
 

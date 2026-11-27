@@ -2,7 +2,14 @@ from datetime import UTC, datetime
 
 import pandas as pd
 
-from samleng.site_status import build_status, lab_log, parse_train_log, step_scores
+from samleng.site_status import (
+    build_status,
+    champion_summary,
+    lab_log,
+    new_best_entries,
+    parse_train_log,
+    step_scores,
+)
 
 LOG = """\
 \x1b[4m\x1b[1m > EPOCH: 3/29\x1b[0m
@@ -130,3 +137,51 @@ def test_lab_log_is_newest_first(tmp_path):
     )
     assert [r["date"] for r in lab_log(f)] == ["2026-11-14", "2026-11-09"]
     assert lab_log(tmp_path / "missing.jsonl") == []
+
+
+STATE = {
+    "run": "new",
+    "step": 4000,
+    "since": "2026-11-27 21:46",
+    "scores": {"ALL": 4.9, "mixed_unseen": 25.2},
+    "before": {"ALL": 5.1},
+    "better": 143,
+    "worse": 93,
+    "history": [
+        {"run": "old", "step": 6000, "since": "2026-11-24 10:00", "history": []},
+        {"run": "older", "step": 10000, "since": "2026-11-20 21:00"},
+    ],
+}
+
+
+def test_new_best_entries_only_for_wins_with_scores(tmp_path):
+    (tmp_path / "new-4000").mkdir()
+    [e] = new_best_entries(STATE, tmp_path)
+    assert e["date"] == "2026-11-27"
+    assert e["champion"] == "new 4000"
+    assert "143 sentences better" in e["en"]["text"]
+    assert "5.1% → 4.9%" in e["en"]["text"]
+    assert "៥.១% មក ៤.៩%" in e["km"]["text"]
+    assert e["audio"][0]["src"] == "new-4000"
+    assert "audio" not in new_best_entries(STATE)[0]
+
+
+def test_written_entry_replaces_the_automatic_one(tmp_path):
+    f = tmp_path / "log.jsonl"
+    auto = new_best_entries(STATE)
+    assert [r["date"] for r in lab_log(f, auto)] == ["2026-11-27"]
+    f.write_text(
+        '{"date": "2026-11-27", "champion": "new 4000", "en": {"title": "Ours"}}\n'
+    )
+    [row] = lab_log(f, auto)
+    assert row["en"]["title"] == "Ours"
+
+
+def test_champion_summary():
+    assert champion_summary(STATE) == {
+        "date": "2026-11-27",
+        "all": 4.9,
+        "mixed_unseen": 25.2,
+    }
+    assert champion_summary(STATE["history"][0]) is None
+    assert champion_summary({}) is None
