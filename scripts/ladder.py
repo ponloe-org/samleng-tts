@@ -87,8 +87,18 @@ def challenge(args: argparse.Namespace) -> None:
         )
     if won:
         history = [*champ.pop("history", []), champ]
+        result = {
+            "scores": medians(b),
+            "before": medians(a),
+            "better": int(v["better"]),
+            "worse": int(v["worse"]),
+        }
         STATE.write_text(
-            json.dumps(entry(args) | {"history": history}, ensure_ascii=False, indent=2)
+            json.dumps(
+                entry(args) | result | {"history": history},
+                ensure_ascii=False,
+                indent=2,
+            )
         )
     print(head.strip())
     try:

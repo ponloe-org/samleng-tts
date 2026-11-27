@@ -29,15 +29,88 @@ def job_info(script: str) -> dict:
     return dict(HEADER.findall(script))
 
 
-def lab_log(path: Path) -> list[dict]:
-    """The page's lab log, newest first: one JSON line per entry with date, en and km (title, text)."""
-    if not path.exists():
-        return []
-    rows = [
-        json.loads(line)
-        for line in path.read_text(encoding="utf-8").splitlines()
-        if line.strip()
-    ]
+KM_DIGITS = str.maketrans("0123456789", "០១២៣៤៥៦៧៨៩")
+NEW_BEST = {
+    "en": (
+        "New best model",
+        "A new model beat our best one on a fresh test: it read {better} sentences better"
+        " and {worse} worse. Error rate on Khmer sentences: {before}% → {after}%.",
+    ),
+    "km": (
+        "ម៉ូដែលល្អបំផុតថ្មី",
+        "ម៉ូដែលថ្មីមួយបានឈ្នះម៉ូដែលល្អបំផុតរបស់យើង នៅក្នុងការតេស្តថ្មី៖ វាអានបានល្អជាងមុន {better} ប្រយោគ"
+        " និងអាក្រក់ជាងមុន {worse} ប្រយោគ។ អត្រាកំហុសលើប្រយោគខ្មែរ ពី {before}% មក {after}%។",
+    ),
+}
+
+
+def champions(state: dict) -> list[dict]:
+    """The champion and every earlier one (older state files nest their history)."""
+    out, todo = [], [state]
+    while todo:
+        c = dict(todo.pop())
+        todo += c.pop("history", [])
+        out.append(c)
+    return out
+
+
+def champion_summary(state: dict) -> dict | None:
+    """The current champion's numbers for the page's results row, if its win recorded them."""
+    s = state.get("scores")
+    if not s:
+        return None
+    return {
+        "date": state["since"][:10],
+        "all": s["ALL"],
+        "mixed_unseen": s.get("mixed_unseen"),
+    }
+
+
+def new_best_entries(state: dict, clips: Path | None = None) -> list[dict]:
+    """One lab-log entry per crowned model whose win recorded its scores.
+
+    Clips are listed when clips/<run>-<step>/ exists (exported with scripts/log_clips.py).
+    """
+    out = []
+    for c in champions(state):
+        if "scores" not in c:
+            continue
+        nums = {
+            "better": c["better"],
+            "worse": c["worse"],
+            "before": f"{c['before']['ALL']:.1f}",
+            "after": f"{c['scores']['ALL']:.1f}",
+        }
+        e = {"date": c["since"][:10], "champion": f"{c['run']} {c['step']}"}
+        for lang, (title, text) in NEW_BEST.items():
+            text = text.format(**nums)
+            e[lang] = {
+                "title": title,
+                "text": text.translate(KM_DIGITS) if lang == "km" else text,
+            }
+        label = f"{c['run']}-{c['step']}"
+        if clips and (clips / label).is_dir():
+            e["audio"] = [{"src": label, "en": "Our model", "km": "ម៉ូដែលរបស់យើង"}]
+        out.append(e)
+    return out
+
+
+def lab_log(path: Path, auto: list[dict] = ()) -> list[dict]:
+    """The page's lab log, newest first: one JSON line per entry with date, en and km (title, text).
+
+    `auto` entries (new best models) are dropped when a written entry names the same champion.
+    """
+    rows = (
+        [
+            json.loads(line)
+            for line in path.read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+        if path.exists()
+        else []
+    )
+    written = {r.get("champion") for r in rows}
+    rows += [e for e in auto if e["champion"] not in written]
     return sorted(rows, key=lambda r: r["date"], reverse=True)
 
 
